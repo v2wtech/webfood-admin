@@ -1,4 +1,5 @@
-import React from "react";
+import React, {useEffect, useState} from "react";
+
 
 import ChartistGraph from "react-chartist";
 
@@ -24,19 +25,34 @@ import CardIcon from "components/Card/CardIcon.js";
 import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
 
-
+import api from "../../services/api"
 
 import {
   dailySalesChart
 } from "variables/charts.js";
 
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
+//  import { async } from "q";
+//  import { infoBoxShadow } from "assets/jss/material-dashboard-react";
 
 const useStyles = makeStyles(styles);
 
 
 
+
 export default function Dashboard() {
+
+ const [data, setdata] = useState([]);
+
+ useEffect(()=> {
+    async function loadData(){
+     const response =  await api.get('http://webfood-api.herokuapp.com/api/category')
+     setdata(response.data);
+   }
+
+ loadData();
+ }, []);
+
 
   const classes = useStyles();
   return (
@@ -120,7 +136,25 @@ export default function Dashboard() {
               </p>
             </CardHeader>
             <CardBody>
-              <Table
+                 {/* <ul>
+                {data.map(inf =>(
+                  <li key={inf.id}>
+                    {inf.title}
+                  </li>
+                   ))}
+                </ul> */}
+              {/*
+                  <table>
+                    <tr>
+                  {data.map(inf =>(
+                    
+                      <td>{inf.title}</td>
+                  
+                  ))}
+                  </tr>
+                  </table> */}
+
+               <Table
                 tableHeaderColor="warning"
                 tableHead={["ID", "Nome", "Endereço", "pedido", "Conta" ]}
                 tableData={[
@@ -129,7 +163,8 @@ export default function Dashboard() {
                   ["3", "Sage Rodriguez", "rua brasil n14", "2 pizzas", "R$ 40 "],
                   ["4", "Philip Chaney", "aaaaaaa n154", "sushi", "R$ 50 "]
                 ]}
-              />
+              /> 
+              
             </CardBody>
           </Card>
         </GridItem>

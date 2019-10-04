@@ -5,6 +5,7 @@ import DashboardPage from "views/Dashboard/Dashboard.js";
 import UserProfile from "views/UserProfile/UserProfile.js";
 import TableList from "views/TableList/TableList.js";
 import Employees from "views/UserProfile/Employees.js";
+import Produtos from "views/Produtos/Produtos.js"
 
 
 import NotificationsPage from "views/Notifications/Notifications.js";
@@ -52,7 +53,7 @@ const dashboardRoutes = [
     path: "/produtos",
     name: "Produtos",
     icon: "fastfood",
-    component: NotificationsPage,
+    component: Produtos,
     layout: "/admin"
   }
 ];
