@@ -2,16 +2,13 @@
 import Dashboard from "@material-ui/icons/Dashboard";
 import Notifications from "@material-ui/icons/Notifications";
 import DashboardPage from "views/Dashboard/Dashboard.js";
-import UserProfile from "views/UserProfile/UserProfile.js";
 import TableList from "views/TableList/TableList.js";
-import Employees from "views/UserProfile/Employees.js";
-import Produtos from "views/Produtos/Produtos.js"
+import Employees from "views/Employees/Employees.js";
+import Clients from "views/Clients/Clients.js";
+import Products from "views/Products/Products.js"
 
 
 import NotificationsPage from "views/Notifications/Notifications.js";
-
-
-
 
 const dashboardRoutes = [
   {
@@ -22,19 +19,19 @@ const dashboardRoutes = [
     layout: "/admin"
   },
   {
-    path: "/Employees",
-    name: "Funcionarios",
-    icon: "people_alt",
-    component: Employees,
+    path: "/orders",
+    name: "Pedidos",
+    icon: Notifications,
+    component: NotificationsPage,
     layout: "/admin"
   },
-   {
-      path: "/cadastrar",
-      name: "Cadastrar",
-      icon: "people_alt",
-      component: UserProfile,
-      layout: "/admin"
-    },
+  {
+    path: "/products",
+    name: "Produtos",
+    icon: "fastfood",
+    component: Products,
+    layout: "/admin"
+  },
   {
     path: "/table",
     name: "Table List",
@@ -43,19 +40,20 @@ const dashboardRoutes = [
     layout: "/admin"
   },
   {
-    path: "/notifications",
-    name: "Notifications",
-    icon: Notifications,
-    component: NotificationsPage,
+    path: "/employees",
+    name: "Funcionários",
+    icon: "people_alt",
+    component: Employees,
     layout: "/admin"
   },
   {
-    path: "/produtos",
-    name: "Produtos",
-    icon: "fastfood",
-    component: Produtos,
+    path: "/clients",
+    name: "Clientes",
+    icon: "people_alt",
+    component: Clients,
     layout: "/admin"
   }
+  
 ];
 
 export default dashboardRoutes;

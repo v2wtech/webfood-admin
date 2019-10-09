@@ -6,7 +6,6 @@ import "perfect-scrollbar/css/perfect-scrollbar.css";
 import { makeStyles } from "@material-ui/core/styles";
 
 import Navbar from "components/Navbars/Navbar.js";
-import Footer from "components/Footer/Footer.js";
 import Sidebar from "components/Sidebar/Sidebar.js";
 
 
@@ -17,21 +16,19 @@ import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 import bgImage from "assets/img/pizza.jpeg";
 import logo from "assets/img/pizzaLogo.png";
 
-// let ps;
-
 const switchRoutes = (
   <Switch>
     {routes.map((prop, key) => {
-      if (prop.layout === "/admin") {
-        return (
-          <Route
-            path={prop.layout + prop.path}
-            component={prop.component}
-            key={key}
-          />
-        );
+      if (prop.layout !== "/admin") {
+        return null;
       }
-      return null;
+      return (
+        <Route
+          path={prop.layout + prop.path}
+          component={prop.component}
+          key={key}
+        />
+      );
     })}
     <Redirect from="/admin" to="/admin/dashboard" />
   </Switch>
@@ -42,10 +39,10 @@ const useStyles = makeStyles(styles);
 export default function Admin({ ...rest }) {
 
   const classes = useStyles();
-  
+
   const mainPanel = React.createRef();
-  
-  
+
+
   const [image] = React.useState(bgImage);
   const [color] = React.useState("red");
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -81,10 +78,8 @@ export default function Admin({ ...rest }) {
             <div className={classes.container}>{switchRoutes}</div>
           </div>
         ) : (
-          <div className={classes.map}>{switchRoutes}</div>
-        )}
-        {getRoute() ? <Footer /> : null}
-       
+            <div className={classes.map}>{switchRoutes}</div>
+          )}
       </div>
     </div>
   );

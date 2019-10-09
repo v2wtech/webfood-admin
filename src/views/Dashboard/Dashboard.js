@@ -1,7 +1,4 @@
-import React, {useEffect, useState} from "react";
-
-
-import ChartistGraph from "react-chartist";
+import React, { useEffect, useState } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Icon from "@material-ui/core/Icon";
@@ -10,9 +7,6 @@ import Store from "@material-ui/icons/Store";
 
 import DateRange from "@material-ui/icons/DateRange";
 import LocalOffer from "@material-ui/icons/LocalOffer";
-import ArrowUpward from "@material-ui/icons/ArrowUpward";
-import AccessTime from "@material-ui/icons/AccessTime";
-
 
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
@@ -27,55 +21,41 @@ import CardFooter from "components/Card/CardFooter.js";
 
 import api from "../../services/api"
 
-import {
-  dailySalesChart
-} from "variables/charts.js";
-
 import styles from "assets/jss/material-dashboard-react/views/dashboardStyle.js";
-//  import { async } from "q";
-//  import { infoBoxShadow } from "assets/jss/material-dashboard-react";
 
 const useStyles = makeStyles(styles);
 
-
-
-
 export default function Dashboard() {
 
- const [data, setdata] = useState([]);
+  const [groups, setGroups] = useState([]);
 
- useEffect(()=> {
-    async function loadData(){
-     const response =  await api.get('http://webfood-api.herokuapp.com/api/category')
-     setdata(response.data);
-   }
+  useEffect(() => {
+    async function loadGroups() {
+      const response = await api.get('/groups?title&enabled');
+      setGroups(response.data);
+    }
 
- loadData();
- }, []);
+    loadGroups();
+  }, []);
 
 
   const classes = useStyles();
   return (
-    <div>
+    <>
       <GridContainer>
-
-        {/* cards superiores */}
-        {/* <GridItem xs={1} sm={1} md={3}>
-
-        </GridItem> */}
         <GridItem xs={12} sm={6} md={6}>
           <Card>
             <CardHeader color="success" stats icon>
               <CardIcon color="success">
                 <Store />
               </CardIcon>
-              <p className={classes.cardCategory}>venda</p>
-              <h3 className={classes.cardTitle}>R$34,24</h3>
+              <p className={classes.cardCategory}>Pedidos (Mesas)</p>
+              <h3 className={classes.cardTitle}>27</h3>
             </CardHeader>
             <CardFooter stats>
               <div className={classes.stats}>
                 <DateRange />
-                Ultimas 24 horas 
+                Ultimas 24 horas
               </div>
             </CardFooter>
           </Card>
@@ -86,7 +66,7 @@ export default function Dashboard() {
               <CardIcon color="warning">
                 <Icon>assignment</Icon>
               </CardIcon>
-              <p className={classes.cardCategory}>Pedidos</p>
+              <p className={classes.cardCategory}>Pedidos (Entrega)</p>
               <h3 className={classes.cardTitle}>15</h3>
             </CardHeader>
             <CardFooter stats>
@@ -98,77 +78,40 @@ export default function Dashboard() {
           </Card>
         </GridItem>
       </GridContainer>
-           {/* cards meio */}
       <GridContainer>
-        <GridItem xs={12} sm={12} md={6}>
-          <Card chart>
+      <GridItem xs={12} sm={12} md={6}>
+          <Card>
             <CardHeader color="success">
-              <ChartistGraph
-                className="ct-chart"
-                data={dailySalesChart.data}
-                type="Line"
-                options={dailySalesChart.options}
-                listener={dailySalesChart.animation}
-              />
+              <h4 className={classes.cardTitleWhite}>Mesas</h4>
             </CardHeader>
             <CardBody>
-              <h4 className={classes.cardTitle}>vendas</h4>
-              <p className={classes.cardCategory}>
-                <span className={classes.successText}>
-                  <ArrowUpward className={classes.upArrowCardCategory} /> 55%
-                </span>{" "}
-                comparado ao mes anterior
-              </p>
+              <Table
+                tableHeaderColor="success"
+                tableHead={["#", "Título", "Status"]}
+                tableData={groups.map(group => 
+                  [`${group.id}`, `${group.title}`, (`${group.enabled}`) ? "Ativo" : "Inativo"]
+                )}
+              />
             </CardBody>
-            <CardFooter chart>
-              <div className={classes.stats}>
-                <AccessTime /> atualizado a 1 hora
-              </div>
-            </CardFooter>
           </Card>
         </GridItem>
         <GridItem xs={12} sm={12} md={6}>
           <Card>
             <CardHeader color="warning">
-              <h4 className={classes.cardTitleWhite}>Pedidos</h4>
-              <p className={classes.cardCategoryWhite}>
-                27 de setembro de 2019
-              </p>
+              <h4 className={classes.cardTitleWhite}>Entrega</h4>
             </CardHeader>
             <CardBody>
-                 {/* <ul>
-                {data.map(inf =>(
-                  <li key={inf.id}>
-                    {inf.title}
-                  </li>
-                   ))}
-                </ul> */}
-              {/*
-                  <table>
-                    <tr>
-                  {data.map(inf =>(
-                    
-                      <td>{inf.title}</td>
-                  
-                  ))}
-                  </tr>
-                  </table> */}
-
-               <Table
+              <Table
                 tableHeaderColor="warning"
-                tableHead={["ID", "Nome", "Endereço", "pedido", "Conta" ]}
-                tableData={[
-                  ["1", "Dakota Rice", "rua brasil n12", "pizza", "R$ 43 "],
-                  ["2", "Minerva Hooper", "rua brasil n13", "Hamburguer", "R$ 15 "],
-                  ["3", "Sage Rodriguez", "rua brasil n14", "2 pizzas", "R$ 40 "],
-                  ["4", "Philip Chaney", "aaaaaaa n154", "sushi", "R$ 50 "]
-                ]}
-              /> 
-              
+                tableHead={["#", "Título", "Status"]}
+                tableData={groups.map(group => 
+                  [`${group.id}`, `${group.title}`, (`${group.enabled}`) ? "Ativo" : "Inativo"]
+                )}
+              />
             </CardBody>
           </Card>
         </GridItem>
       </GridContainer>
-    </div>
+    </>
   );
 }

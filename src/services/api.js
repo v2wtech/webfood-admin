@@ -1,9 +1,7 @@
-// import React, { Component  } from "react";
 import axios from "axios";
 
 const api = axios.create({
-    baseUrl: "http://webfood-api.herokuapp.com"
+    baseURL: "http://webfood-api.herokuapp.com/api"
   });
-
 
 export default api;

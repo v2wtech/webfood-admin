@@ -1,5 +1,4 @@
 import React from "react";
-// @material-ui/core components
 
 import InputLabel from "@material-ui/core/InputLabel";
 import GridItem from "components/Grid/GridItem.js";
@@ -8,18 +7,13 @@ import CustomInput from "components/CustomInput/CustomInput.js";
 import Button from "components/CustomButtons/Button.js";
 import Card from "components/Card/Card.js";
 
-
 import CardBody from "components/Card/CardBody.js";
 import CardFooter from "components/Card/CardFooter.js";
-
-
-
-
 
 export default function UserProfile() {
   
   return (
-    <div>
+    <>
       <GridContainer>
         <GridItem xs={12} sm={12} md={12}>
           <Card>
@@ -129,6 +123,6 @@ export default function UserProfile() {
         </GridItem>
         
       </GridContainer>
-    </div>
+    </>
   );
 }
