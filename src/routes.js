@@ -1,6 +1,5 @@
 
 import Dashboard from "@material-ui/icons/Dashboard";
-import Notifications from "@material-ui/icons/Notifications";
 import DashboardPage from "views/Dashboard/Dashboard.js";
 import TableList from "views/TableList/TableList.js";
 import Employees from "views/Employees/Employees.js";
@@ -21,7 +20,7 @@ const dashboardRoutes = [
   {
     path: "/orders",
     name: "Pedidos",
-    icon: Notifications,
+    icon: "content_paste",
     component: NotificationsPage,
     layout: "/admin"
   },
@@ -33,9 +32,9 @@ const dashboardRoutes = [
     layout: "/admin"
   },
   {
-    path: "/table",
-    name: "Table List",
-    icon: "content_paste",
+    path: "/tables",
+    name: "Mesas",
+    icon: "table",
     component: TableList,
     layout: "/admin"
   },

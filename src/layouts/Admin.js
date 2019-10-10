@@ -13,8 +13,8 @@ import routes from "routes.js";
 
 import styles from "assets/jss/material-dashboard-react/layouts/adminStyle.js";
 
-import bgImage from "assets/img/pizza.jpeg";
-import logo from "assets/img/pizzaLogo.png";
+import bgImage from "assets/img/wf_background.jpg";
+import logo from "assets/img/favicon.png";
 
 const switchRoutes = (
   <Switch>
