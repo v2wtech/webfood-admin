@@ -65,7 +65,7 @@ export default function EmployeeList() {
     async function updateEmployee(employee, data) {
       employee.enabled = data.enabled;
 
-      api.put(`/employees/update/${employee.id}`, employee)
+      await api.put(`/employees/${employee.id}`, { employee })
         .then(res => console.log(res))
         .catch(err => console.warn(err));
     }
@@ -98,11 +98,11 @@ export default function EmployeeList() {
           employee.name,
           employee.cpf,
           employee.phone,
-          employee.role,
+          employee.role ? 'Administrador' : 'Usuário',
           employee.permission ? 'Sim' : 'Não',
           employee.user,
           isEnabled(employee.enabled, employee)
-        ])
+          ])
       );
     }
 
