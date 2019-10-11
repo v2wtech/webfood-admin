@@ -8,10 +8,14 @@ import GridContainer from "components/Grid/GridContainer.js";
 import Table from "components/Table/Table.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
+import CardFooter from "components/Card/CardFooter.js";
 import CardBody from "components/Card/CardBody.js";
+import InputLabel from '@material-ui/core/InputLabel';
+import CustomInput from "components/CustomInput/CustomInput.js";
 import Button from "components/CustomButtons/Button.js";
 import Switch from '@material-ui/core/Switch';
 import Tooltip from '@material-ui/core/Tooltip';
+import Modal from '@material-ui/core/Modal';
 
 import api from "../../services/api";
 
@@ -42,7 +46,14 @@ const styles = {
       fontWeight: "400",
       lineHeight: "1"
     }
-  }
+  },
+  paper: {
+    position: 'absolute',
+    width: 500,
+    backgroundColor: '#FFF',
+    border: 'none',
+    borderRadius: '5px',
+  },
 };
 
 const useStyles = makeStyles(styles);
@@ -51,8 +62,31 @@ export default function EmployeeList() {
   const classes = useStyles();
 
   const [employees, setEmployees] = useState([]);
-  const [enabled, setEnabled] = useState(false);
-  const [render, setRender] = useState(true);
+  const [enabled, setEnabled] = useState('');
+  const [render, setRender] = useState('');
+
+  // Modal config
+  const [modalStyle] = React.useState(getModalStyle);
+  const [open, setOpen] = React.useState();
+
+  function getModalStyle() {
+    const top = 50;
+    const left = 50;
+
+    return {
+      top: `${top}%`,
+      left: `${left}%`,
+      transform: `translate(-${top}%, -${left}%)`,
+    };
+  }
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     async function loadEmployees() {
@@ -94,7 +128,7 @@ export default function EmployeeList() {
 
       setEmployees(
         employees.map(employee =>
-        [employee.id,
+          [employee.id,
           employee.name,
           employee.cpf,
           employee.phone,
@@ -112,9 +146,98 @@ export default function EmployeeList() {
   return (
     <GridContainer>
       <GridItem xs={12} sm={12} md={12}>
-        <Link to="/admin/register">
-          <Button color="success"> novo </Button>
-        </Link>
+        <Button color="success" onClick={handleOpen}> novo </Button>
+
+        <Modal
+          aria-labelledby="simple-modal-title"
+          aria-describedby="simple-modal-description"
+          open={open}
+          onClose={handleClose}
+        >
+          <form style={modalStyle} className={classes.paper}>
+            <GridContainer>
+              <GridItem xs={12} sm={12} md={12}>
+                <Card>
+                  <CardBody>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={12}>
+                        <CustomInput
+                          labelText="Nome"
+                          id="nameEmployee"
+                          formControlProps={{
+                            fullWidth: true
+                          }}
+                        />
+                      </GridItem>
+                    </GridContainer>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <CustomInput
+                          labelText="CPF"
+                          id="cpfEmployee"
+                          formControlProps={{
+                            fullWidth: true
+                          }}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <CustomInput
+                          labelText="Telefone"
+                          id="phoneEmployee"
+                          formControlProps={{
+                            fullWidth: true
+                          }}
+                        />
+                      </GridItem>
+                    </GridContainer>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <label htmlFor="permissionEmployee">Administrador</label>
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <label htmlFor="permissionEmployee">Acesso ao Sistema</label>
+                      </GridItem>
+                    </GridContainer>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={12}>
+                        <CustomInput
+                          labelText="Usuário"
+                          id="userEmployee"
+                          formControlProps={{
+                            fullWidth: true
+                          }}
+                        />
+                      </GridItem>
+                    </GridContainer>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <CustomInput
+                          labelText="Senha"
+                          id="passwordEmployee"
+                          formControlProps={{
+                            fullWidth: true
+                          }}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <CustomInput
+                          labelText="Confirmar Senha"
+                          id="verifyPassword"
+                          formControlProps={{
+                            fullWidth: true
+                          }}
+                        />
+                      </GridItem>
+                    </GridContainer>
+                  </CardBody>
+                  <CardFooter>
+                    <Button color="primary">Salvar</Button>
+                  </CardFooter>
+                </Card>
+              </GridItem>
+            </GridContainer>
+          </form>
+        </Modal>
 
         <Card>
           <CardHeader color="primary">
@@ -133,6 +256,6 @@ export default function EmployeeList() {
           </CardBody>
         </Card>
       </GridItem>
-    </GridContainer>
+    </GridContainer >
   );
 }
