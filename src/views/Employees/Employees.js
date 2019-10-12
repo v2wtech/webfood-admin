@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
 // @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
 // core components
@@ -10,12 +9,11 @@ import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardFooter from "components/Card/CardFooter.js";
 import CardBody from "components/Card/CardBody.js";
-import InputLabel from '@material-ui/core/InputLabel';
-import CustomInput from "components/CustomInput/CustomInput.js";
 import Button from "components/CustomButtons/Button.js";
 import Switch from '@material-ui/core/Switch';
 import Tooltip from '@material-ui/core/Tooltip';
 import Modal from '@material-ui/core/Modal';
+import TextField from '@material-ui/core/TextField';
 
 import api from "../../services/api";
 
@@ -60,9 +58,12 @@ const useStyles = makeStyles(styles);
 
 export default function EmployeeList() {
   const classes = useStyles();
+  // Post
+  const [form, setForm] = useState({});
 
+  // Status config
   const [employees, setEmployees] = useState([]);
-  const [enabled, setEnabled] = useState('');
+  const [enabled, setEnabled] = useState({});
   const [render, setRender] = useState('');
 
   // Modal config
@@ -104,25 +105,30 @@ export default function EmployeeList() {
         .catch(err => console.warn(err));
     }
 
+    function handleEnabled(id, status) {
+      setEnabled({ [id]: status });
+    }
+
     function parseEmployees(employees) {
       const isEnabled = (status, employee) => {
         if (render)
-          setEnabled(status);
+          handleEnabled(employee.id, status);
 
         setRender(false);
 
         return (
-          <Tooltip title={enabled ? 'Desativar' : 'Ativar'}>
+          <Tooltip title={enabled[employee.id] ? 'Desativar' : 'Ativar'}>
             <Switch
-              checked={enabled}
-              onChange={() => { toggle(employee, !enabled); }}
+              checked={enabled[employee.id]}
+              onChange={() => { toggle(employee, !enabled[employee.id]); }}
             />
           </Tooltip>
         );
       };
 
       const toggle = (employee, status) => {
-        setEnabled(status);
+        handleEnabled(employee.id, status);
+        // setEnabled(status);
         updateEmployee(employee, { enabled: status });
       };
 
@@ -140,8 +146,25 @@ export default function EmployeeList() {
       );
     }
 
+
+
     loadEmployees();
-  }, [enabled]);
+  }, [form]);
+
+  const handleForm = name => event => {
+    setForm({ ...form, role: 1, permission: 1, [name]: event.target.value });
+  };
+
+  async function handleSubmit(evt) {
+    evt.preventDefault();
+
+    console.log(form);
+
+    await api.post('/employees/register', form)
+      .then(response => {console.log(response); })
+      .catch(err => console.warn(err))
+  }
+
 
   return (
     <GridContainer>
@@ -154,39 +177,36 @@ export default function EmployeeList() {
           open={open}
           onClose={handleClose}
         >
-          <form style={modalStyle} className={classes.paper}>
+          <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
             <GridContainer>
               <GridItem xs={12} sm={12} md={12}>
                 <Card>
                   <CardBody>
                     <GridContainer>
                       <GridItem xs={12} sm={12} md={12}>
-                        <CustomInput
-                          labelText="Nome"
+                        <TextField
+                          label="Nome"
                           id="nameEmployee"
-                          formControlProps={{
-                            fullWidth: true
-                          }}
+                          value={form.name}
+                          onChange={handleForm('name')}
                         />
                       </GridItem>
                     </GridContainer>
                     <GridContainer>
                       <GridItem xs={12} sm={12} md={6}>
-                        <CustomInput
-                          labelText="CPF"
+                        <TextField
+                          label="CPF"
                           id="cpfEmployee"
-                          formControlProps={{
-                            fullWidth: true
-                          }}
+                          value={form.cpf}
+                          onChange={handleForm('cpf')}
                         />
                       </GridItem>
                       <GridItem xs={12} sm={12} md={6}>
-                        <CustomInput
-                          labelText="Telefone"
+                        <TextField
+                          label="Telefone"
                           id="phoneEmployee"
-                          formControlProps={{
-                            fullWidth: true
-                          }}
+                          value={form.phone}
+                          onChange={handleForm('phone')}
                         />
                       </GridItem>
                     </GridContainer>
@@ -200,38 +220,33 @@ export default function EmployeeList() {
                     </GridContainer>
                     <GridContainer>
                       <GridItem xs={12} sm={12} md={12}>
-                        <CustomInput
-                          labelText="Usuário"
+                        <TextField
+                          label="Usuário"
                           id="userEmployee"
-                          formControlProps={{
-                            fullWidth: true
-                          }}
+                          value={form.user}
+                          onChange={handleForm('user')}
                         />
                       </GridItem>
                     </GridContainer>
                     <GridContainer>
                       <GridItem xs={12} sm={12} md={6}>
-                        <CustomInput
-                          labelText="Senha"
+                        <TextField
+                          label="Senha"
                           id="passwordEmployee"
-                          formControlProps={{
-                            fullWidth: true
-                          }}
+                          value={form.password}
+                          onChange={handleForm('password')}
                         />
                       </GridItem>
                       <GridItem xs={12} sm={12} md={6}>
-                        <CustomInput
-                          labelText="Confirmar Senha"
+                        <TextField
+                          label="Confirmar Senha"
                           id="verifyPassword"
-                          formControlProps={{
-                            fullWidth: true
-                          }}
                         />
                       </GridItem>
                     </GridContainer>
                   </CardBody>
                   <CardFooter>
-                    <Button color="primary">Salvar</Button>
+                    <Button color="primary" type="submit">Salvar</Button>
                   </CardFooter>
                 </Card>
               </GridItem>
