@@ -51,63 +51,80 @@ export default function EmployeeList() {
   const classes = useStyles();
 
   const [employees, setEmployees] = useState([]);
-  const [enabled, setEnabled] = useState(false);
-  const [render, setRender] = useState(true);
+  const [enabled, setEnabled] = useState({});
+  const [shouldChange, setShouldChange] = useState(true);
 
   useEffect(() => {
     async function loadEmployees() {
-      await api.get('/employees?name&enabled')
+      await api.get('/employees', {
+        params: {
+          name: '',
+          enabled: ''
+        }})
         .then(response => response.data)
         .then(data => parseEmployees(data))
         .catch(err => console.warn(err));
     }
 
+    const handleEnabled = (id, status) =>
+          setEnabled({ [id]: status });
+
     async function updateEmployee(employee, data) {
       employee.enabled = data.enabled;
 
-      api.put(`/employees/update/${employee.id}`, employee)
-        .then(res => console.log(res))
+      api.put(`/employees/${employee.id}`, { enabled: employee.enabled })
+        .then(res => {
+          console.log(res);
+          console.log(`Funcionário ${employee.name} ${employee.enabled ? 'ativado' : 'desativado'}`);
+          // TODO: toaster!
+        })
         .catch(err => console.warn(err));
     }
 
     function parseEmployees(employees) {
       const isEnabled = (status, employee) => {
-        if (render)
-          setEnabled(status);
+        // console.log('id: ', employee.id, 'status: ', status);
+        // console.log('setEnabled: ', { [employee.id]: status });
 
-        setRender(false);
+        if (shouldChange)
+          handleEnabled(employee, status);
+
+        console.log('enabled', employee.id, enabled[employee.id]);
+
+        setShouldChange(false);
 
         return (
           <Tooltip title={enabled ? 'Desativar' : 'Ativar'}>
             <Switch
-              checked={enabled}
-              onChange={() => { toggle(employee, !enabled); }}
+              checked={enabled[employee.id]}
+              onChange={() => toggle(employee, !enabled[employee.id])}
             />
-          </Tooltip>
+            </Tooltip>
         );
       };
 
       const toggle = (employee, status) => {
-        setEnabled(status);
+        handleEnabled(employee.id, status);
         updateEmployee(employee, { enabled: status });
+        setShouldChange(false);
       };
 
       setEmployees(
         employees.map(employee =>
-        [employee.id,
-          employee.name,
-          employee.cpf,
-          employee.phone,
-          employee.role,
-          employee.permission ? 'Sim' : 'Não',
-          employee.user,
-          isEnabled(employee.enabled, employee)
-        ])
+          [String(employee.id),
+            employee.name,
+            employee.cpf,
+            employee.phone,
+            employee.role ? 'Administrador' : 'Usuário',
+            employee.permission ? 'Sim' : 'Não',
+            employee.user,
+            isEnabled(employee.enabled, employee)
+          ])
       );
     }
 
     loadEmployees();
-  }, [enabled]);
+  }, []);
 
   return (
     <GridContainer>
