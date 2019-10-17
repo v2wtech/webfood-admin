@@ -8,10 +8,13 @@ import GridContainer from "components/Grid/GridContainer.js";
 import Table from "components/Table/Table.js";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
+import CardFooter from "components/Card/CardFooter.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
 import Switch from '@material-ui/core/Switch';
 import Tooltip from '@material-ui/core/Tooltip';
+import Modal from '@material-ui/core/Modal';
+import TextField from '@material-ui/core/TextField';
 
 import api from "../../services/api";
 
@@ -42,17 +45,46 @@ const styles = {
       fontWeight: "400",
       lineHeight: "1"
     }
-  }
+  },
+  paper: {
+    position: 'absolute',
+    width: 500,
+    backgroundColor: '#FFF',
+    border: 'none',
+    borderRadius: '5px',
+  },
 };
 
 const useStyles = makeStyles(styles);
 
 export default function EmployeeList() {
   const classes = useStyles();
+  // Post
+  const [form, setForm] = useState({});
 
+  // Status config
   const [employees, setEmployees] = useState([]);
   const [enabled, setEnabled] = useState({});
   const [shouldChange, setShouldChange] = useState(true);
+
+  function getModalStyle() {
+    const top = 50;
+    const left = 50;
+
+    return {
+      top: `${top}%`,
+      left: `${left}%`,
+      transform: `translate(-${top}%, -${left}%)`,
+    };
+  }
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   useEffect(() => {
     async function loadEmployees() {
@@ -99,14 +131,13 @@ export default function EmployeeList() {
               checked={enabled[employee.id]}
               onChange={() => toggle(employee, !enabled[employee.id])}
             />
-            </Tooltip>
+          </Tooltip>
         );
       };
 
       const toggle = (employee, status) => {
         handleEnabled(employee.id, status);
         updateEmployee(employee, { enabled: status });
-        setShouldChange(false);
       };
 
       setEmployees(
@@ -124,14 +155,110 @@ export default function EmployeeList() {
     }
 
     loadEmployees();
-  }, []);
+  }, [form]);
+
+  const handleForm = name => event => {
+    setForm({ ...form, role: 1, permission: 1, [name]: event.target.value });
+  };
+
+  async function handleSubmit(evt) {
+    evt.preventDefault();
+
+    console.log(form);
+
+    await api.post('/employees/register', form)
+      .then(response => {console.log(response); })
+      .catch(err => console.warn(err))
+  }
+
 
   return (
     <GridContainer>
       <GridItem xs={12} sm={12} md={12}>
-        <Link to="/admin/register">
-          <Button color="success"> novo </Button>
-        </Link>
+        <Button color="success" onClick={handleOpen}> novo </Button>
+
+        <Modal
+          aria-labelledby="simple-modal-title"
+          aria-describedby="simple-modal-description"
+          open={open}
+          onClose={handleClose}
+        >
+          <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
+            <GridContainer>
+              <GridItem xs={12} sm={12} md={12}>
+                <Card>
+                  <CardBody>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={12}>
+                        <TextField
+                          label="Nome"
+                          id="nameEmployee"
+                          value={form.name}
+                          onChange={handleForm('name')}
+                        />
+                      </GridItem>
+                    </GridContainer>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <TextField
+                          label="CPF"
+                          id="cpfEmployee"
+                          value={form.cpf}
+                          onChange={handleForm('cpf')}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <TextField
+                          label="Telefone"
+                          id="phoneEmployee"
+                          value={form.phone}
+                          onChange={handleForm('phone')}
+                        />
+                      </GridItem>
+                    </GridContainer>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <label htmlFor="permissionEmployee">Administrador</label>
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <label htmlFor="permissionEmployee">Acesso ao Sistema</label>
+                      </GridItem>
+                    </GridContainer>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={12}>
+                        <TextField
+                          label="Usuário"
+                          id="userEmployee"
+                          value={form.user}
+                          onChange={handleForm('user')}
+                        />
+                      </GridItem>
+                    </GridContainer>
+                    <GridContainer>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <TextField
+                          label="Senha"
+                          id="passwordEmployee"
+                          value={form.password}
+                          onChange={handleForm('password')}
+                        />
+                      </GridItem>
+                      <GridItem xs={12} sm={12} md={6}>
+                        <TextField
+                          label="Confirmar Senha"
+                          id="verifyPassword"
+                        />
+                      </GridItem>
+                    </GridContainer>
+                  </CardBody>
+                  <CardFooter>
+                    <Button color="primary" type="submit">Salvar</Button>
+                  </CardFooter>
+                </Card>
+              </GridItem>
+            </GridContainer>
+          </form>
+        </Modal>
 
         <Card>
           <CardHeader color="primary">

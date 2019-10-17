@@ -10,6 +10,8 @@ import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
+import Switch from '@material-ui/core/Switch';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import api from '../../services/api';
 
@@ -48,16 +50,65 @@ const useStyles = makeStyles(styles);
 export default function ProdutosPage() {
 
   const [products, setProducts] = useState([]);
+  const [enabled, setEnabled] = useState(false);
+  const [render, setRender] = useState(true);
 
   useEffect(() => {
     async function loadProducts() {
-      const reponse = await api.get('/products?title&enabled');
+      await api.get('/products?title&enabled')
+        .then(response => response.data)
+        .then(data => parseProducts(data))
+        .catch(err => console.warn(err))
+    }
 
-      setProducts(reponse.data);
+    async function updateProduct(product, data) {
+      product.enabled = data.enabled;
+
+      await api.put(`/products/${product.id}`, { product })
+        .then(res => console.log(res))
+        .then(console.log(product.id))
+        .catch(err => console.warn(err))
+    }
+
+    function parseProducts(products) {
+      const isEnabled = (status, product) => {
+        if (render)
+          setEnabled(status);
+
+        setRender(false);
+
+        return (
+          <Tooltip title={enabled ? 'Desativar' : 'Ativar'}>
+            <Switch
+              checked={enabled}
+              onChange={() => { toggle(product, !enabled); }}
+            />
+          </Tooltip>
+        );
+      };
+
+      const toggle = (product, status) => {
+        setEnabled(status);
+        updateProduct(product, { enabled: status });
+      };
+
+      setProducts(
+        products.map(product =>
+        [product.id,
+          product.title,
+          product.description,
+          product.valuePaid,
+          product.priceSell,
+          product.Group.title,
+          product.Category.title,
+          product.Subcategory.title,
+          isEnabled(product.enabled, product)
+          ])
+      );
     }
 
     loadProducts();
-  }, [])
+  }, [enabled])
 
   const classes = useStyles();
 
@@ -80,9 +131,7 @@ export default function ProdutosPage() {
             <Table
               tableHeaderColor="primary"
               tableHead={["#", "Produto", "Descrição", "Valor", "Preço", "Grupo", "Categoria", "Subcategoria", "Status"]}
-              tableData={products.map(product => 
-                [`${product.id}`, `${product.title}`,`${product.description}`,`${product.valuePaid}`, `${product.priceSell}`, `${product.Group.title}`, `${product.Category.title}`, `${product.Subcategory.title}`, (`${product.enabled}`)? "Ativo":"Inativo"]  
-              )}
+              tableData={products}
             />
           </CardBody>
         </Card>
