@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link } from 'react-router-dom';
-// @material-ui/core components
 import { makeStyles } from "@material-ui/core/styles";
-// core components
 import GridItem from "components/Grid/GridItem.js";
 import GridContainer from "components/Grid/GridContainer.js";
 import Table from "components/Table/Table.js";
@@ -64,8 +61,12 @@ export default function EmployeeList() {
 
   // Status config
   const [employees, setEmployees] = useState([]);
+  const [employeesData, setEmployeesData] = useState([]);
   const [enabled, setEnabled] = useState({});
-  const [shouldChange, setShouldChange] = useState(true);
+
+  // Modal config
+  const [modalStyle] = React.useState(getModalStyle);
+  const [open, setOpen] = React.useState();
 
   function getModalStyle() {
     const top = 50;
@@ -94,54 +95,53 @@ export default function EmployeeList() {
           enabled: ''
         }})
         .then(response => response.data)
-        .then(data => parseEmployees(data))
+        .then(data => setEmployeesData(data))
         .catch(err => console.warn(err));
     }
 
-    const handleEnabled = (id, status) =>
-          setEnabled({ [id]: status });
+    loadEmployees();
+  }, []);
 
+  useEffect(() => {
     async function updateEmployee(employee, data) {
+      console.log(data);
       employee.enabled = data.enabled;
 
       api.put(`/employees/${employee.id}`, { enabled: employee.enabled })
         .then(res => {
-          console.log(res);
-          console.log(`Funcionário ${employee.name} ${employee.enabled ? 'ativado' : 'desativado'}`);
-          // TODO: toaster!
+          console.log(`Funcionário ${employee.name} ${employee.enabled ? 'ativado' : 'desativado'}`); // TODO: toaster!
         })
         .catch(err => console.warn(err));
     }
 
-    function parseEmployees(employees) {
+    function parseEmployees() {
+      let enabledStatus = {};
+
       const isEnabled = (status, employee) => {
-        // console.log('id: ', employee.id, 'status: ', status);
-        // console.log('setEnabled: ', { [employee.id]: status });
+        enabledStatus = { ...enabledStatus, [employee.id]: status };
 
-        if (shouldChange)
-          handleEnabled(employee, status);
-
-        console.log('enabled', employee.id, enabled[employee.id]);
-
-        setShouldChange(false);
+        if (Object.keys(enabledStatus).length == employeesData.length)
+          setEnabled(status);
 
         return (
-          <Tooltip title={enabled ? 'Desativar' : 'Ativar'}>
+          <Tooltip title={enabledStatus[employee.id] ? 'Desativar' : 'Ativar'}>
             <Switch
-              checked={enabled[employee.id]}
-              onChange={() => toggle(employee, !enabled[employee.id])}
+              checked={enabledStatus[employee.id]}
+              onChange={() => toggle(employee, !enabledStatus[employee.id])}
             />
           </Tooltip>
         );
       };
 
       const toggle = (employee, status) => {
-        handleEnabled(employee.id, status);
+        enabledStatus[employee.id] = status;
+
+        setEnabled(enabledStatus);
         updateEmployee(employee, { enabled: status });
       };
 
       setEmployees(
-        employees.map(employee =>
+        employeesData.map(employee =>
           [String(employee.id),
             employee.name,
             employee.cpf,
@@ -154,8 +154,8 @@ export default function EmployeeList() {
       );
     }
 
-    loadEmployees();
-  }, [form]);
+    parseEmployees();
+  }, [employeesData.length, Object.keys(enabled).length]);
 
   const handleForm = name => event => {
     setForm({ ...form, role: 1, permission: 1, [name]: event.target.value });
@@ -168,9 +168,8 @@ export default function EmployeeList() {
 
     await api.post('/employees/register', form)
       .then(response => {console.log(response); })
-      .catch(err => console.warn(err))
-  }
-
+      .catch(err => console.warn(err));
+  };
 
   return (
     <GridContainer>
