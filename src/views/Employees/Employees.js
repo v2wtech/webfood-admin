@@ -8,10 +8,20 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardFooter from "components/Card/CardFooter.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
-import Switch from '@material-ui/core/Switch';
-import Tooltip from '@material-ui/core/Tooltip';
-import Modal from '@material-ui/core/Modal';
-import TextField from '@material-ui/core/TextField';
+import DeleteIcon from '@material-ui/icons/Delete';
+
+import {
+  Tooltip,
+  Modal,
+  Switch,
+  TextField,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle
+} from '@material-ui/core';
 
 import api from "../../services/api";
 
@@ -50,9 +60,68 @@ const styles = {
     border: 'none',
     borderRadius: '5px',
   },
+  employeeNameDialog: {
+    fontWeight: '900',
+    fontFamily: "'Arial', sans-serif"
+  },
+  deleteDialogWarn: {
+    fontSize: '12px',
+    color: 'red'
+  }
 };
 
 const useStyles = makeStyles(styles);
+
+function DeleteEmployee(props) {
+  const classes = useStyles();
+
+  const employeeData = props['employee-data'];
+  const [open, setOpen] = useState(false);
+
+  const handleOpen  = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  async function deleteEmployee(employee) {
+    api.delete('/employees/' + employee.id)
+      .then(res => console.log("Funcionário", employee.name, "removido.")) // TODO: modal
+      .catch(err => console.warn(err));
+  };
+
+  const handleAcceptAction = () => {
+    deleteEmployee(employeeData);
+    setOpen(false);
+  };
+
+  return (
+    <div>
+      <IconButton aria-label="delete" onClick={handleOpen}>
+        <DeleteIcon />
+      </IconButton>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">Remover funcionário?</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+      Remover permanentemente o funcionário <strong className={classes.employeeNameDialog}>{employeeData.name}</strong>?
+      <p className={classes.deleteDialogWarn}>Esta ação não pode ser revertida!</p>
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleAcceptAction} color="danger">
+            Sim
+          </Button>
+          <Button onClick={handleClose} color="primary" autoFocus>
+            Não
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
+  );
+}
 
 export default function EmployeeList() {
   const classes = useStyles();
@@ -120,7 +189,7 @@ export default function EmployeeList() {
       const isEnabled = (status, employee) => {
         enabledStatus = { ...enabledStatus, [employee.id]: status };
 
-        if (Object.keys(enabledStatus).length == employeesData.length)
+        if (Object.keys(enabledStatus).length === employeesData.length)
           setEnabled(status);
 
         return (
@@ -140,16 +209,20 @@ export default function EmployeeList() {
         updateEmployee(employee, { enabled: status });
       };
 
+      const renderActions = (employee) =>
+            <DeleteEmployee employee-data={employee} />;
+
       setEmployees(
         employeesData.map(employee =>
-          [String(employee.id),
-            employee.name,
-            employee.cpf,
-            employee.phone,
-            employee.role ? 'Administrador' : 'Usuário',
-            employee.permission ? 'Sim' : 'Não',
-            employee.user,
-            isEnabled(employee.enabled, employee)
+          [renderActions(employee),
+           String(employee.id),
+           employee.name,
+           employee.cpf,
+           employee.phone,
+           employee.role ? 'Administrador' : 'Usuário',
+           employee.permission ? 'Sim' : 'Não',
+           employee.user,
+           isEnabled(employee.enabled, employee)
           ])
       );
     }
@@ -270,7 +343,7 @@ export default function EmployeeList() {
           <CardBody>
             <Table
               tableHeaderColor="primary"
-              tableHead={["#", "Nome", "Cpf", "Telefone", "Tipo", "Permissão", "Usuário", "Status"]}
+              tableHead={["", "#", "Nome", "Cpf", "Telefone", "Tipo", "Permissão", "Usuário", "Status"]}
               tableData={employees}
             />
           </CardBody>
