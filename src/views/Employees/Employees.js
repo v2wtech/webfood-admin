@@ -78,7 +78,7 @@ function DeleteEmployee(props) {
   const employeeData = props['employee-data'];
   const [open, setOpen] = useState(false);
 
-  const handleOpen  = () => setOpen(true);
+  const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   async function deleteEmployee(employee) {
@@ -106,7 +106,7 @@ function DeleteEmployee(props) {
         <DialogTitle id="alert-dialog-title">Remover funcionário?</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-      Remover permanentemente o funcionário <strong className={classes.employeeNameDialog}>{employeeData.name}</strong>?
+            Remover permanentemente o funcionário <strong className={classes.employeeNameDialog}>{employeeData.name}</strong>?
       <p className={classes.deleteDialogWarn}>Esta ação não pode ser revertida!</p>
           </DialogContentText>
         </DialogContent>
@@ -125,6 +125,7 @@ function DeleteEmployee(props) {
 
 export default function EmployeeList() {
   const classes = useStyles();
+
   // Post
   const [form, setForm] = useState({});
 
@@ -162,7 +163,8 @@ export default function EmployeeList() {
         params: {
           name: '',
           enabled: ''
-        }})
+        }
+      })
         .then(response => response.data)
         .then(data => setEmployeesData(data))
         .catch(err => console.warn(err));
@@ -210,19 +212,19 @@ export default function EmployeeList() {
       };
 
       const renderActions = (employee) =>
-            <DeleteEmployee employee-data={employee} />;
+        <DeleteEmployee employee-data={employee} />;
 
       setEmployees(
         employeesData.map(employee =>
-          [renderActions(employee),
-           String(employee.id),
-           employee.name,
-           employee.cpf,
-           employee.phone,
-           employee.role ? 'Administrador' : 'Usuário',
-           employee.permission ? 'Sim' : 'Não',
-           employee.user,
-           isEnabled(employee.enabled, employee)
+          [String(employee.id),
+          employee.name,
+          employee.cpf,
+          employee.phone,
+          employee.role ? 'Administrador' : 'Usuário',
+          employee.permission ? 'Sim' : 'Não',
+          employee.user,
+          isEnabled(employee.enabled, employee),
+          renderActions(employee)
           ])
       );
     }
@@ -240,7 +242,7 @@ export default function EmployeeList() {
     console.log(form);
 
     await api.post('/employees/register', form)
-      .then(response => {console.log(response); })
+      .then(response => { console.log(response); })
       .catch(err => console.warn(err));
   };
 
@@ -267,6 +269,7 @@ export default function EmployeeList() {
                           id="nameEmployee"
                           value={form.name}
                           onChange={handleForm('name')}
+                          style={{ width: "93%" }}
                         />
                       </GridItem>
                     </GridContainer>
@@ -303,6 +306,7 @@ export default function EmployeeList() {
                           id="userEmployee"
                           value={form.user}
                           onChange={handleForm('user')}
+                          style={{ width: "93%" }}
                         />
                       </GridItem>
                     </GridContainer>
@@ -343,7 +347,7 @@ export default function EmployeeList() {
           <CardBody>
             <Table
               tableHeaderColor="primary"
-              tableHead={["", "#", "Nome", "Cpf", "Telefone", "Tipo", "Permissão", "Usuário", "Status"]}
+              tableHead={["#", "Nome", "Cpf", "Telefone", "Tipo", "Permissão", "Usuário", "Status", "Ações"]}
               tableData={employees}
             />
           </CardBody>
