@@ -135,8 +135,8 @@ export default function CategoryList() {
   const [form, setForm] = useState({});
 
   // Status config
-  const [subcategories, setSubsubcategories] = useState([]);
-  const [subcategoriesData, setSubsubcategoriesData] = useState([]);
+  const [subcategories, setSubcategories] = useState([]);
+  const [subcategoriesData, setSubcategoriesData] = useState([]);
   const [enabled, setEnabled] = useState({});
 
   // Modal config
@@ -187,7 +187,7 @@ export default function CategoryList() {
         }
       })
         .then(response => response.data)
-        .then(data => setSubsubcategoriesData(data))
+        .then(data => setSubcategoriesData(data))
         .catch(err => console.warn(err));
     }
 
@@ -235,7 +235,7 @@ export default function CategoryList() {
       const renderActions = (subcategory) =>
         <DeleteCategory subcategory-data={subcategory} />;
 
-      setSubsubcategories(
+      setSubcategories(
         subcategoriesData.map(subcategory =>
           [String(subcategory.id),
           subcategory.title,

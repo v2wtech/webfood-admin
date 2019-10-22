@@ -178,9 +178,9 @@ export default function GroupList() {
       console.log(data);
       group.enabled = data.enabled;
 
-      api.put(`/groups/${group.id}`, { enabled: group.enabled })
+      await api.put(`/groups/${group.id}`, { enabled: group.enabled })
         .then(res => {
-          console.log(`Funcionário ${group.title} ${group.enabled ? 'ativado' : 'desativado'}`); // TODO: toaster!
+          console.log(`Grupo ${group.title} ${group.enabled ? 'ativado' : 'desativado'}`); // TODO: toaster!
         })
         .catch(err => console.warn(err));
     }
@@ -228,7 +228,7 @@ export default function GroupList() {
   }, [groupsData.length, Object.keys(enabled).length]);
 
   const handleForm = name => event => {
-    setForm({ ...form, role: 1, permission: 1, [name]: event.target.value });
+    setForm({ ...form, [name]: event.target.value });
   };
 
   async function handleSubmit(evt) {
