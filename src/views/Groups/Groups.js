@@ -20,10 +20,14 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  Select,
+  InputLabel,
+  FormControl
 } from '@material-ui/core';
 
 import api from "../../services/api";
+import { cardHeader } from "assets/jss/material-dashboard-react";
 
 const styles = {
   cardCategoryWhite: {
@@ -134,6 +138,12 @@ export default function GroupList() {
   const [groupsData, setGroupsData] = useState([]);
   const [enabled, setEnabled] = useState({});
 
+  const [search, setSearch] = useState({
+    title: '',
+    enabled: ''
+  });
+
+
   // Modal config
   const [modalStyle] = React.useState(getModalStyle);
   const [open, setOpen] = React.useState();
@@ -157,21 +167,21 @@ export default function GroupList() {
     setOpen(false);
   };
 
-  useEffect(() => {
-    async function loadGroups() {
-      await api.get('/groups', {
-        params: {
-          title: '',
-          enabled: ''
-        }
-      })
-        .then(response => response.data)
-        .then(data => setGroupsData(data))
-        .catch(err => console.warn(err));
-    }
+  async function loadGroups() {
+    await api.get('/groups', {
+      params: {
+        title: search.title,
+        enabled: search.enabled
+      }
+    })
+      .then(response => response.data)
+      .then(data => setGroupsData(data))
+      .catch(err => console.warn(err));
+  }
 
+  useEffect(() => {
     loadGroups();
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     async function updateGroup(group, data) {
@@ -231,6 +241,10 @@ export default function GroupList() {
     setForm({ ...form, [name]: event.target.value });
   };
 
+  const handleSearch = name => event => {
+    setSearch({ ...search, [name]: event.target.value });
+  }
+
   async function handleSubmit(evt) {
     evt.preventDefault();
 
@@ -239,63 +253,99 @@ export default function GroupList() {
     await api.post('/groups/register', form)
       .then(response => { console.log(response); })
       .catch(err => console.warn(err));
+
+    setOpen(false);
+    loadGroups();
   };
 
   return (
-    <GridContainer>
-      <GridItem xs={12} sm={12} md={12}>
-        <Button color="success" onClick={handleOpen}> novo </Button>
+    <>
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={5}>
+          <Button color="success" onClick={handleOpen}> novo </Button>
+        </GridItem>
 
-        <Modal
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-          open={open}
-          onClose={handleClose}
-        >
-          <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
-            <GridContainer>
-              <GridItem xs={12} sm={12} md={12}>
-                <Card>
-                  <CardBody>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={12}>
-                        <TextField
-                          label="Grupo"
-                          id="titleGroup"
-                          value={form.title}
-                          onChange={handleForm('title')}
-                          style={{ width: "93%" }}
-                        />
-                      </GridItem>
-                    </GridContainer>
+        <GridItem xs={12} sm={12} md={2}>
+          <FormControl className={classes.formControl} style={{ width: "100%" }}>
+            <InputLabel htmlFor="">Status</InputLabel>
+            <Select
+              native
+              value={search.enabled}
+              onChange={handleSearch('enabled')}
+            >
+              <option value="" />
+              <option value={1}>Ativos</option>
+              <option value={0}>Inativos</option>
+            </Select>
+          </FormControl>
+        </GridItem>
 
-                  </CardBody>
-                  <CardFooter>
-                    <Button color="primary" type="submit">Salvar</Button>
-                  </CardFooter>
-                </Card>
-              </GridItem>
-            </GridContainer>
-          </form>
-        </Modal>
 
-        <Card>
-          <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Grupos</h4>
-            <p className={classes.cardCategoryWhite}>
-              Lista de grupos
+        <GridItem xs={12} sm={12} md={5}>
+          <TextField
+            label="Buscar"
+            id="searchGroup"
+            value={search.title}
+            onChange={handleSearch('title')}
+            style={{ width: "100%" }}
+          />
+        </GridItem>
+
+      </GridContainer>
+
+      <Modal
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+        open={open}
+        onClose={handleClose}
+      >
+        <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
+          <GridContainer>
+            <GridItem xs={12} sm={12} md={12}>
+              <Card>
+                <CardBody>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={12}>
+                      <TextField
+                        label="Grupo"
+                        id="titleGroup"
+                        value={form.title}
+                        onChange={handleForm('title')}
+                        style={{ width: "93%" }}
+                      />
+                    </GridItem>
+                  </GridContainer>
+
+                </CardBody>
+                <CardFooter>
+                  <Button color="primary" type="submit">Salvar</Button>
+                </CardFooter>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </form>
+      </Modal>
+
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={12}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Grupos</h4>
+              <p className={classes.cardCategoryWhite}>
+                Lista de grupos
             </p>
-          </CardHeader>
+            </CardHeader>
 
-          <CardBody>
-            <Table
-              tableHeaderColor="primary"
-              tableHead={["#", "Grupo", "Status", "Ações"]}
-              tableData={groups}
-            />
-          </CardBody>
-        </Card>
-      </GridItem>
-    </GridContainer>
+            <CardBody>
+              <Table
+                tableHeaderColor="primary"
+                tableHead={["#", "Grupo", "Status", "Ações"]}
+                tableData={groups}
+              />
+            </CardBody>
+          </Card>
+        </GridItem>
+      </GridContainer >
+    </>
   );
 }

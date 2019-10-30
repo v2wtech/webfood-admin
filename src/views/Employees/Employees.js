@@ -20,7 +20,10 @@ import {
   DialogActions,
   DialogContent,
   DialogContentText,
-  DialogTitle
+  DialogTitle,
+  FormControl,
+  InputLabel,
+  Select
 } from '@material-ui/core';
 
 import api from "../../services/api";
@@ -134,9 +137,15 @@ export default function EmployeeList() {
   const [employeesData, setEmployeesData] = useState([]);
   const [enabled, setEnabled] = useState({});
 
+  const [search, setSearch] = useState({
+    name: '',
+    enabled: ''
+  });
+
   // Modal config
   const [modalStyle] = React.useState(getModalStyle);
   const [open, setOpen] = React.useState();
+  const [tooltip, setTooltip] = React.useState({})
 
   function getModalStyle() {
     const top = 50;
@@ -157,21 +166,21 @@ export default function EmployeeList() {
     setOpen(false);
   };
 
-  useEffect(() => {
-    async function loadEmployees() {
-      await api.get('/employees', {
-        params: {
-          name: '',
-          enabled: ''
-        }
-      })
-        .then(response => response.data)
-        .then(data => setEmployeesData(data))
-        .catch(err => console.warn(err));
-    }
+  async function loadEmployees() {
+    await api.get('/employees', {
+      params: {
+        name: search.name,
+        enabled: search.enabled
+      }
+    })
+      .then(response => response.data)
+      .then(data => setEmployeesData(data))
+      .catch(err => console.warn(err));
+  }
 
+  useEffect(() => {
     loadEmployees();
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     async function updateEmployee(employee, data) {
@@ -233,126 +242,183 @@ export default function EmployeeList() {
   }, [employeesData.length, Object.keys(enabled).length]);
 
   const handleForm = name => event => {
-    setForm({ ...form, role: 1, permission: 1, [name]: event.target.value });
+    setForm({ ...form, [name]: event.target.value });
+  };
+
+  const handleSearch = name => event => {
+    setSearch({ ...search, [name]: event.target.value });
+  };
+
+  const handleTooltip = name => event => {
+    setTooltip({ ...tooltip, [name]: event.target.checked });
   };
 
   async function handleSubmit(evt) {
     evt.preventDefault();
+
+    setForm({ ...form, role: tooltip.role, permission: tooltip.permission });
 
     console.log(form);
 
     await api.post('/employees/register', form)
       .then(response => { console.log(response); })
       .catch(err => console.warn(err));
+
+    setOpen(false);
+    loadEmployees();
   };
 
   return (
-    <GridContainer>
-      <GridItem xs={12} sm={12} md={12}>
-        <Button color="success" onClick={handleOpen}> novo </Button>
+    <>
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={5}>
+          <Button color="success" onClick={handleOpen}> novo </Button>
+        </GridItem>
 
-        <Modal
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-          open={open}
-          onClose={handleClose}
-        >
-          <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
-            <GridContainer>
-              <GridItem xs={12} sm={12} md={12}>
-                <Card>
-                  <CardBody>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={12}>
-                        <TextField
-                          label="Nome"
-                          id="nameEmployee"
-                          value={form.name}
-                          onChange={handleForm('name')}
-                          style={{ width: "93%" }}
-                        />
-                      </GridItem>
-                    </GridContainer>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={6}>
-                        <TextField
-                          label="CPF"
-                          id="cpfEmployee"
-                          value={form.cpf}
-                          onChange={handleForm('cpf')}
-                        />
-                      </GridItem>
-                      <GridItem xs={12} sm={12} md={6}>
-                        <TextField
-                          label="Telefone"
-                          id="phoneEmployee"
-                          value={form.phone}
-                          onChange={handleForm('phone')}
-                        />
-                      </GridItem>
-                    </GridContainer>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={6}>
-                        <label htmlFor="permissionEmployee">Administrador</label>
-                      </GridItem>
-                      <GridItem xs={12} sm={12} md={6}>
-                        <label htmlFor="permissionEmployee">Acesso ao Sistema</label>
-                      </GridItem>
-                    </GridContainer>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={12}>
-                        <TextField
-                          label="Usuário"
-                          id="userEmployee"
-                          value={form.user}
-                          onChange={handleForm('user')}
-                          style={{ width: "93%" }}
-                        />
-                      </GridItem>
-                    </GridContainer>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={6}>
-                        <TextField
-                          label="Senha"
-                          id="passwordEmployee"
-                          value={form.password}
-                          onChange={handleForm('password')}
-                        />
-                      </GridItem>
-                      <GridItem xs={12} sm={12} md={6}>
-                        <TextField
-                          label="Confirmar Senha"
-                          id="verifyPassword"
-                        />
-                      </GridItem>
-                    </GridContainer>
-                  </CardBody>
-                  <CardFooter>
-                    <Button color="primary" type="submit">Salvar</Button>
-                  </CardFooter>
-                </Card>
-              </GridItem>
-            </GridContainer>
-          </form>
-        </Modal>
+        <GridItem xs={12} sm={12} md={2}>
+          <FormControl className={classes.formControl} style={{ width: "100%" }}>
+            <InputLabel htmlFor="">Status</InputLabel>
+            <Select
+              native
+              value={search.enabled}
+              onChange={handleSearch('enabled')}
+            >
+              <option value="" />
+              <option value={1}>Ativos</option>
+              <option value={0}>Inativos</option>
+            </Select>
+          </FormControl>
+        </GridItem>
 
-        <Card>
-          <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Funcionários</h4>
-            <p className={classes.cardCategoryWhite}>
-              Lista de Funcionários
+
+        <GridItem xs={12} sm={12} md={5}>
+          <TextField
+            label="Buscar"
+            id="searchEmployees"
+            value={search.name}
+            onChange={handleSearch('name')}
+            style={{ width: "100%" }}
+          />
+        </GridItem>
+      </GridContainer>
+
+      <Modal
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+        open={open}
+        onClose={handleClose}
+      >
+        <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
+          <GridContainer>
+            <GridItem xs={12} sm={12} md={12}>
+              <Card>
+                <CardBody>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={12}>
+                      <TextField
+                        label="Nome"
+                        id="nameEmployee"
+                        value={form.name}
+                        onChange={handleForm('name')}
+                        style={{ width: "93%" }}
+                      />
+                    </GridItem>
+                  </GridContainer>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={6}>
+                      <TextField
+                        label="CPF"
+                        id="cpfEmployee"
+                        value={form.cpf}
+                        onChange={handleForm('cpf')}
+                      />
+                    </GridItem>
+                    <GridItem xs={12} sm={12} md={6}>
+                      <TextField
+                        label="Telefone"
+                        id="phoneEmployee"
+                        value={form.phone}
+                        onChange={handleForm('phone')}
+                      />
+                    </GridItem>
+                  </GridContainer>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={6}>
+                      <label htmlFor="permissionEmployee">Administrador</label>
+                      <Tooltip title={tooltip.role ? 'Sim' : 'Não'}>
+                        <Switch
+                          checked={tooltip.role}
+                          onChange={handleTooltip('role')}
+                        />
+                      </Tooltip>
+                    </GridItem>
+                    <GridItem xs={12} sm={12} md={6}>
+                      <label htmlFor="permissionEmployee">Acesso ao Sistema</label>
+                      <Tooltip title={tooltip.permission ? 'Sim' : 'Não'}>
+                        <Switch
+                          checked={tooltip.permission}
+                          onChange={handleTooltip('permission')}
+                        />
+                      </Tooltip>
+                    </GridItem>
+                  </GridContainer>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={12}>
+                      <TextField
+                        label="Usuário"
+                        id="userEmployee"
+                        value={form.user}
+                        onChange={handleForm('user')}
+                        style={{ width: "93%" }}
+                      />
+                    </GridItem>
+                  </GridContainer>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={6}>
+                      <TextField
+                        label="Senha"
+                        id="passwordEmployee"
+                        value={form.password}
+                        onChange={handleForm('password')}
+                      />
+                    </GridItem>
+                    <GridItem xs={12} sm={12} md={6}>
+                      <TextField
+                        label="Confirmar Senha"
+                        id="verifyPassword"
+                      />
+                    </GridItem>
+                  </GridContainer>
+                </CardBody>
+                <CardFooter>
+                  <Button color="primary" type="submit">Salvar</Button>
+                </CardFooter>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </form>
+      </Modal>
+
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={12}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Funcionários</h4>
+              <p className={classes.cardCategoryWhite}>
+                Lista de Funcionários
             </p>
-          </CardHeader>
+            </CardHeader>
 
-          <CardBody>
-            <Table
-              tableHeaderColor="primary"
-              tableHead={["#", "Nome", "Cpf", "Telefone", "Tipo", "Permissão", "Usuário", "Status", "Ações"]}
-              tableData={employees}
-            />
-          </CardBody>
-        </Card>
-      </GridItem>
-    </GridContainer>
+            <CardBody>
+              <Table
+                tableHeaderColor="primary"
+                tableHead={["#", "Nome", "Cpf", "Telefone", "Tipo", "Permissão", "Usuário", "Status", "Ações"]}
+                tableData={employees}
+              />
+            </CardBody>
+          </Card>
+        </GridItem>
+      </GridContainer>
+    </>
   );
 }

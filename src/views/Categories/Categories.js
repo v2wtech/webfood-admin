@@ -139,6 +139,11 @@ export default function CategoryList() {
   const [categoriesData, setCategoriesData] = useState([]);
   const [enabled, setEnabled] = useState({});
 
+  const [search, setSearch] = useState({
+    title: '',
+    enabled: ''
+  });
+
   // Modal config
   const [modalStyle] = React.useState(getModalStyle);
   const [open, setOpen] = React.useState();
@@ -178,21 +183,21 @@ export default function CategoryList() {
     loadGroups();
   }, []);
 
-  useEffect(() => {
-    async function loadCategories() {
-      await api.get('/categories', {
-        params: {
-          title: '',
-          enabled: ''
-        }
-      })
-        .then(response => response.data)
-        .then(data => setCategoriesData(data))
-        .catch(err => console.warn(err));
-    }
+  async function loadCategories() {
+    await api.get('/categories', {
+      params: {
+        title: search.title,
+        enabled: search.enabled
+      }
+    })
+      .then(response => response.data)
+      .then(data => setCategoriesData(data))
+      .catch(err => console.warn(err));
+  }
 
+  useEffect(() => {
     loadCategories();
-  }, []);
+  }, [search]);
 
   useEffect(() => {
     async function updateCategory(category, data) {
@@ -251,6 +256,9 @@ export default function CategoryList() {
   const handleForm = name => event => {
     setForm({ ...form, [name]: event.target.value });
   };
+  const handleSearch = name => event => {
+    setSearch({ ...search, [name]: event.target.value });
+  };
 
   async function handleSubmit(evt) {
     evt.preventDefault();
@@ -260,78 +268,113 @@ export default function CategoryList() {
     await api.post('/categories/register', form)
       .then(response => { console.log(response); })
       .catch(err => console.warn(err));
+
+    setOpen(false);
+    loadCategories();
   };
 
   return (
-    <GridContainer>
-      <GridItem xs={12} sm={12} md={12}>
-        <Button color="success" onClick={handleOpen}> novo </Button>
+    <>
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={5}>
+          <Button color="success" onClick={handleOpen}> novo </Button>
+        </GridItem>
 
-        <Modal
-          aria-labelledby="simple-modal-title"
-          aria-describedby="simple-modal-description"
-          open={open}
-          onClose={handleClose}
-        >
-          <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
-            <GridContainer>
-              <GridItem xs={12} sm={12} md={12}>
-                <Card>
-                  <CardBody>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={12}>
-                        <FormControl className={classes.formControl} style={{ width: "50%" }}>
-                          <InputLabel htmlFor="age-native-simple">Grupo</InputLabel>
-                          <Select
-                            native
-                            value={form.groupId}
-                            onChange={handleForm('groupId')}
-                          >
-                            <option value="" />
-                            {groups.map(group => <option value={group.id}>{group.title}</option>)}
-                          </Select>
-                        </FormControl>
-                      </GridItem>
-                    </GridContainer>
-                    <GridContainer>
-                      <GridItem xs={12} sm={12} md={12}>
-                        <TextField
-                          label="Categoria"
-                          id="titleCategory"
-                          value={form.title}
-                          onChange={handleForm('title')}
-                          style={{ width: "93%" }}
-                        />
-                      </GridItem>
-                    </GridContainer>
+        <GridItem xs={12} sm={12} md={2}>
+          <FormControl className={classes.formControl} style={{ width: "100%" }}>
+            <InputLabel htmlFor="">Status</InputLabel>
+            <Select
+              native
+              value={search.enabled}
+              onChange={handleSearch('enabled')}
+            >
+              <option value="" />
+              <option value={1}>Ativos</option>
+              <option value={0}>Inativos</option>
+            </Select>
+          </FormControl>
+        </GridItem>
 
-                  </CardBody>
-                  <CardFooter>
-                    <Button color="primary" type="submit">Salvar</Button>
-                  </CardFooter>
-                </Card>
-              </GridItem>
-            </GridContainer>
-          </form>
-        </Modal>
 
-        <Card>
-          <CardHeader color="primary">
-            <h4 className={classes.cardTitleWhite}>Categorias</h4>
-            <p className={classes.cardCategoryWhite}>
-              Lista de categorias
+        <GridItem xs={12} sm={12} md={5}>
+          <TextField
+            label="Buscar"
+            id="searchCategories"
+            value={search.title}
+            onChange={handleSearch('title')}
+            style={{ width: "100%" }}
+          />
+        </GridItem>
+      </GridContainer>
+
+      <Modal
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+        open={open}
+        onClose={handleClose}
+      >
+        <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
+          <GridContainer>
+            <GridItem xs={12} sm={12} md={12}>
+              <Card>
+                <CardBody>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={12}>
+                      <FormControl className={classes.formControl} style={{ width: "50%" }}>
+                        <InputLabel htmlFor="age-native-simple">Grupo</InputLabel>
+                        <Select
+                          native
+                          value={form.groupId}
+                          onChange={handleForm('groupId')}
+                        >
+                          <option value="" />
+                          {groups.map(group => <option value={group.id}>{group.title}</option>)}
+                        </Select>
+                      </FormControl>
+                    </GridItem>
+                  </GridContainer>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={12}>
+                      <TextField
+                        label="Categoria"
+                        id="titleCategory"
+                        value={form.title}
+                        onChange={handleForm('title')}
+                        style={{ width: "93%" }}
+                      />
+                    </GridItem>
+                  </GridContainer>
+
+                </CardBody>
+                <CardFooter>
+                  <Button color="primary" type="submit">Salvar</Button>
+                </CardFooter>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </form>
+      </Modal>
+
+      <GridContainer>
+        <GridItem xs={12} sm={12} md={12}>
+          <Card>
+            <CardHeader color="primary">
+              <h4 className={classes.cardTitleWhite}>Categorias</h4>
+              <p className={classes.cardCategoryWhite}>
+                Lista de categorias
             </p>
-          </CardHeader>
+            </CardHeader>
 
-          <CardBody>
-            <Table
-              tableHeaderColor="primary"
-              tableHead={["#", "Categoria", "Status", "Ações"]}
-              tableData={categories}
-            />
-          </CardBody>
-        </Card>
-      </GridItem>
-    </GridContainer>
+            <CardBody>
+              <Table
+                tableHeaderColor="primary"
+                tableHead={["#", "Categoria", "Status", "Ações"]}
+                tableData={categories}
+              />
+            </CardBody>
+          </Card>
+        </GridItem>
+      </GridContainer >
+    </>
   );
 }
