@@ -110,7 +110,7 @@ function DeleteClient(props) {
         <DialogTitle id="alert-dialog-title">Remover cliente?</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Remover permanentemente o cliente <strong className={classes.clientNameDialog}>{clientData.title}</strong>?
+            Remover permanentemente o cliente <strong className={classes.clientNameDialog}>{clientData.name}</strong>?
       <p className={classes.deleteDialogWarn}>Esta ação não pode ser revertida!</p>
           </DialogContentText>
         </DialogContent>
