@@ -1,7 +1,7 @@
 
 import Dashboard from "@material-ui/icons/Dashboard";
 import DashboardPage from "views/Dashboard/Dashboard.js";
-import TableList from "views/TableList/TableList.js";
+import Tables from "views/Tables/Tables.js";
 import Employees from "views/Employees/Employees.js";
 import Clients from "views/Clients/Clients.js";
 import Products from "views/Products/Products.js"
@@ -59,7 +59,7 @@ const dashboardRoutes = [
     path: "/tables",
     name: "Mesas",
     icon: "table",
-    component: TableList,
+    component: Tables,
     layout: "/admin"
   },
   {

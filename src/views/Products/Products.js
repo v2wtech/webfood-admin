@@ -464,7 +464,7 @@ export default function ProductList() {
             <CardBody>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["#", "Produto", "Descrição", "Valor", "Preço", "Grupo", "Categoria", "Subcategoria", "Status"]}
+                tableHead={["#", "Produto", "Descrição", "Valor", "Preço", "Grupo", "Categoria", "Subcategoria", "Status", "Ações"]}
                 tableData={products}
               />
             </CardBody>

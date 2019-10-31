@@ -64,7 +64,7 @@ const styles = {
     border: 'none',
     borderRadius: '5px',
   },
-  groupNameDialog: {
+  tableNameDialog: {
     fontWeight: '900',
     fontFamily: "'Arial', sans-serif"
   },
@@ -76,23 +76,23 @@ const styles = {
 
 const useStyles = makeStyles(styles);
 
-function DeleteGroup(props) {
+function DeleteTable(props) {
   const classes = useStyles();
 
-  const groupData = props['group-data'];
+  const tableData = props['table-data'];
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  async function deleteGroup(group) {
-    api.delete('/groups/' + group.id)
-      .then(res => console.log("Grupo", group.title, "removido.")) // TODO: modal
+  async function deleteTable(table) {
+    api.delete('/tables/' + table.id)
+      .then(res => console.log("Mesa", table.name, "removido.")) // TODO: modal
       .catch(err => console.warn(err));
   };
 
   const handleAcceptAction = () => {
-    deleteGroup(groupData);
+    deleteTable(tableData);
     setOpen(false);
   };
 
@@ -107,10 +107,10 @@ function DeleteGroup(props) {
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
-        <DialogTitle id="alert-dialog-title">Remover grupo?</DialogTitle>
+        <DialogTitle id="alert-dialog-title">Remover mesa?</DialogTitle>
         <DialogContent>
           <DialogContentText id="alert-dialog-description">
-            Remover permanentemente o grupo <strong className={classes.groupNameDialog}>{groupData.title}</strong>?
+            Remover permanentemente o mesa <strong className={classes.tableNameDialog}>{tableData.title}</strong>?
       <p className={classes.deleteDialogWarn}>Esta ação não pode ser revertida!</p>
           </DialogContentText>
         </DialogContent>
@@ -127,19 +127,19 @@ function DeleteGroup(props) {
   );
 }
 
-export default function GroupList() {
+export default function TableList() {
   const classes = useStyles();
 
   // Post
   const [form, setForm] = useState({});
 
   // Status config
-  const [groups, setGroups] = useState([]);
-  const [groupsData, setGroupsData] = useState([]);
+  const [tables, setTables] = useState([]);
+  const [tablesData, setTablesData] = useState([]);
   const [enabled, setEnabled] = useState({});
 
   const [search, setSearch] = useState({
-    title: '',
+    description: '',
     enabled: ''
   });
 
@@ -167,75 +167,75 @@ export default function GroupList() {
     setOpen(false);
   };
 
-  async function loadGroups() {
-    await api.get('/groups', {
+  async function loadTables() {
+    await api.get('/tables', {
       params: {
-        title: search.title,
+        description: search.description,
         enabled: search.enabled
       }
     })
       .then(response => response.data)
-      .then(data => setGroupsData(data))
+      .then(data => setTablesData(data))
       .catch(err => console.warn(err));
   }
 
   useEffect(() => {
-    loadGroups();
+    loadTables();
   }, [search]);
 
   useEffect(() => {
-    async function updateGroup(group, data) {
+    async function updateTable(table, data) {
       console.log(data);
-      group.enabled = data.enabled;
+      table.enabled = data.enabled;
 
-      await api.put(`/groups/${group.id}`, { enabled: group.enabled })
+      await api.put(`/tables/${table.id}`, { enabled: table.enabled })
         .then(res => {
-          console.log(`Grupo ${group.title} ${group.enabled ? 'ativado' : 'desativado'}`); // TODO: toaster!
+          console.log(`Mesa ${table.description} ${table.enabled ? 'ativado' : 'desativado'}`); // TODO: toaster!
         })
         .catch(err => console.warn(err));
     }
 
-    function parseGroups() {
+    function parseTables() {
       let enabledStatus = {};
 
-      const isEnabled = (status, group) => {
-        enabledStatus = { ...enabledStatus, [group.id]: status };
+      const isEnabled = (status, table) => {
+        enabledStatus = { ...enabledStatus, [table.id]: status };
 
-        if (Object.keys(enabledStatus).length === groupsData.length)
+        if (Object.keys(enabledStatus).length === tablesData.length)
           setEnabled(status);
 
         return (
-          <Tooltip title={enabledStatus[group.id] ? 'Desativar' : 'Ativar'}>
+          <Tooltip title={enabledStatus[table.id] ? 'Desativar' : 'Ativar'}>
             <Switch
-              checked={enabledStatus[group.id]}
-              onChange={() => toggle(group, !enabledStatus[group.id])}
+              checked={enabledStatus[table.id]}
+              onChange={() => toggle(table, !enabledStatus[table.id])}
             />
           </Tooltip>
         );
       };
 
-      const toggle = (group, status) => {
-        enabledStatus[group.id] = status;
+      const toggle = (table, status) => {
+        enabledStatus[table.id] = status;
 
         setEnabled(enabledStatus);
-        updateGroup(group, { enabled: status });
+        updateTable(table, { enabled: status });
       };
 
-      const renderActions = (group) =>
-        <DeleteGroup group-data={group} />;
+      const renderActions = (table) =>
+        <DeleteTable table-data={table} />;
 
-      setGroups(
-        groupsData.map(group =>
-          [String(group.id),
-          group.title,
-          isEnabled(group.enabled, group),
-          renderActions(group)
+      setTables(
+        tablesData.map(table =>
+          [String(table.id),
+          table.description,
+          isEnabled(table.enabled, table),
+          renderActions(table)
           ])
       );
     }
 
-    parseGroups();
-  }, [groupsData.length, Object.keys(enabled).length]);
+    parseTables();
+  }, [tablesData.length, Object.keys(enabled).length]);
 
   const handleForm = name => event => {
     setForm({ ...form, [name]: event.target.value });
@@ -250,12 +250,12 @@ export default function GroupList() {
 
     console.log(form);
 
-    await api.post('/groups/register', form)
+    await api.post('/tables/register', form)
       .then(response => { console.log(response); })
       .catch(err => console.warn(err));
 
     setOpen(false);
-    loadGroups();
+    loadTables();
   };
 
   return (
@@ -284,9 +284,9 @@ export default function GroupList() {
         <GridItem xs={12} sm={12} md={5}>
           <TextField
             label="Buscar"
-            id="searchGroup"
-            value={search.title}
-            onChange={handleSearch('title')}
+            id="searchTable"
+            value={search.description}
+            onChange={handleSearch('description')}
             style={{ width: "100%" }}
           />
         </GridItem>
@@ -307,10 +307,10 @@ export default function GroupList() {
                   <GridContainer>
                     <GridItem xs={12} sm={12} md={12}>
                       <TextField
-                        label="Grupo"
-                        id="titleGroup"
-                        value={form.title}
-                        onChange={handleForm('title')}
+                        label="Mesa"
+                        id="descriptionTable"
+                        value={form.description}
+                        onChange={handleForm('description')}
                         style={{ width: "93%" }}
                       />
                     </GridItem>
@@ -330,17 +330,17 @@ export default function GroupList() {
         <GridItem xs={12} sm={12} md={12}>
           <Card>
             <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Grupos</h4>
+              <h4 className={classes.cardTitleWhite}>Mesas</h4>
               <p className={classes.cardCategoryWhite}>
-                Lista de grupos
+                Lista de mesas
             </p>
             </CardHeader>
 
             <CardBody>
               <Table
                 tableHeaderColor="primary"
-                tableHead={["#", "Grupo", "Status", "Ações"]}
-                tableData={groups}
+                tableHead={["#", "Mesa", "Status", "Ações"]}
+                tableData={tables}
               />
             </CardBody>
           </Card>
