@@ -30,7 +30,7 @@ const dashboardRoutes = [
   {
     path: "/groups",
     name: "Grupos",
-    icon: "fastfood",
+    icon: "view_stream",
     component: Groups,
     layout: "/admin"
   },
@@ -72,7 +72,7 @@ const dashboardRoutes = [
   {
     path: "/clients",
     name: "Clientes",
-    icon: "people_alt",
+    icon: "people_outline",
     component: Clients,
     layout: "/admin"
   }

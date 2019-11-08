@@ -9,6 +9,7 @@ import CardFooter from "components/Card/CardFooter.js";
 import CardBody from "components/Card/CardBody.js";
 import Button from "components/CustomButtons/Button.js";
 import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 
 import {
   Tooltip,
@@ -71,10 +72,108 @@ const styles = {
   deleteDialogWarn: {
     fontSize: '12px',
     color: 'red'
+  },
+  actions: {
+    display: 'flex'
+  },
+  'groups_list:last-child': {
+    textAlign: 'center',
+    width: '50px'
+  },
+  groups_card: {
+    margin: '0 !important'
   }
 };
 
 const useStyles = makeStyles(styles);
+
+function EditGroup(props) {
+  const classes = useStyles();
+
+  function getModalStyle() {
+    const top = 50;
+    const left = 50;
+
+    return {
+      top: `${top}%`,
+      left: `${left}%`,
+      transform: `translate(-${top}%, -${left}%)`,
+    };
+  }
+
+  const groupData = props['group-data'];
+  const callback = props['callback'];
+  const [modalStyle] = React.useState(getModalStyle);
+  const [open, setOpen] = React.useState();
+  const [form, setForm] = useState({
+    title: groupData.title
+  });
+
+  const handleForm = name => event => {
+    setForm({ ...groupData, [name]: event.target.value });
+  };
+
+  const handleOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  async function handleSubmit(evt) {
+    evt.preventDefault();
+
+    api.put('/groups/' + form.id, form)
+      .then(res => console.log(res))
+      .catch(err => console.warn(err));
+
+    callback();
+    handleClose();
+  }
+
+  return (
+    <div>
+      <IconButton aria-label="edit" onClick={handleOpen}>
+        <EditIcon />
+      </IconButton>
+
+      <Modal
+        aria-labelledby="simple-modal-title"
+        aria-describedby="simple-modal-description"
+        open={open}
+        onClose={handleClose}
+      >
+        <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
+          <GridContainer>
+            <GridItem xs={12} sm={12} md={12}>
+              <Card className={classes.groups_card}>
+                <CardBody>
+                  <h4>Editar Grupo</h4>
+                  <GridContainer>
+                    <GridItem xs={12} sm={12} md={12}>
+                      <TextField
+                        label="Nome do Grupo"
+                        id="titleGroup"
+                        value={form.title}
+                        onChange={handleForm('title')}
+                        style={{ width: "93%" }}
+                      />
+                    </GridItem>
+                  </GridContainer>
+
+                </CardBody>
+                <CardFooter>
+                  <Button color="primary" type="submit">Salvar</Button>
+                </CardFooter>
+              </Card>
+            </GridItem>
+          </GridContainer>
+        </form>
+      </Modal>
+    </div>
+  );
+}
 
 function DeleteGroup(props) {
   const classes = useStyles();
@@ -221,8 +320,14 @@ export default function GroupList() {
         updateGroup(group, { enabled: status });
       };
 
-      const renderActions = (group) =>
-        <DeleteGroup group-data={group} />;
+      const renderActions = (group) => {
+        return (
+          <div className={classes.actions}>
+            <EditGroup group-data={group} callback={loadGroups} />
+            <DeleteGroup group-data={group} />
+          </div>
+        );
+      };
 
       setGroups(
         groupsData.map(group =>
@@ -243,7 +348,7 @@ export default function GroupList() {
 
   const handleSearch = name => event => {
     setSearch({ ...search, [name]: event.target.value });
-  }
+  };
 
   async function handleSubmit(evt) {
     evt.preventDefault();
@@ -259,7 +364,7 @@ export default function GroupList() {
   };
 
   return (
-    <>
+    <div>
       <GridContainer>
         <GridItem xs={12} sm={12} md={5}>
           <Button color="success" onClick={handleOpen}> novo </Button>
@@ -302,8 +407,9 @@ export default function GroupList() {
         <form style={modalStyle} className={classes.paper} onSubmit={handleSubmit}>
           <GridContainer>
             <GridItem xs={12} sm={12} md={12}>
-              <Card>
+              <Card className={classes.groups_card}>
                 <CardBody>
+                  <h4>Criar grupo</h4>
                   <GridContainer>
                     <GridItem xs={12} sm={12} md={12}>
                       <TextField
@@ -338,6 +444,7 @@ export default function GroupList() {
 
             <CardBody>
               <Table
+                className={classes.groups_list}
                 tableHeaderColor="primary"
                 tableHead={["#", "Grupo", "Status", "Ações"]}
                 tableData={groups}
@@ -346,6 +453,6 @@ export default function GroupList() {
           </Card>
         </GridItem>
       </GridContainer >
-    </>
+    </div>
   );
 }
