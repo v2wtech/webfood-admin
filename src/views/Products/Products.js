@@ -287,6 +287,10 @@ export default function ProductList() {
   }, [productsData.length, Object.keys(enabled).length])
 
   const handleForm = name => event => {
+    if (!event.target.value) {
+      [name] = null
+    }
+
     setForm({ ...form, [name]: event.target.value });
   };
 
