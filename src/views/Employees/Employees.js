@@ -377,6 +377,7 @@ export default function EmployeeList() {
                     <GridItem xs={12} sm={12} md={6}>
                       <TextField
                         label="Senha"
+                        type="password"
                         id="passwordEmployee"
                         value={form.password}
                         onChange={handleForm('password')}
@@ -385,6 +386,7 @@ export default function EmployeeList() {
                     <GridItem xs={12} sm={12} md={6}>
                       <TextField
                         label="Confirmar Senha"
+                        type="password"
                         id="verifyPassword"
                       />
                     </GridItem>
